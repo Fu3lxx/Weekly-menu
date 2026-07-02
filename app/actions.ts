@@ -90,10 +90,34 @@ const addMealSchema = z.object({
 export async function addMeal(input: z.infer<typeof addMealSchema>) {
   const parsed = addMealSchema.parse(input);
   const supabase = getServerSupabase();
+
+  // determine next position for this date + meal_type
+  const { data: lastRows, error: selErr } = await supabase
+    .from("meal_plan")
+    .select("position")
+    .eq("date", parsed.date)
+    .eq("meal_type", parsed.meal_type)
+    .order("position", { ascending: false })
+    .limit(1);
+  if (selErr) throw selErr;
+  const maxPos = lastRows && lastRows.length > 0 ? Number(lastRows[0].position ?? 0) : 0;
+  const row = { ...parsed, position: maxPos + 1 };
+
   const { error } = await supabase
     .from("meal_plan")
-    .upsert(parsed, { onConflict: "date,meal_type,recipe_id" });
+    .upsert(row, { onConflict: "date,meal_type,recipe_id" });
   if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
+export async function updateMealOrder(ids: string[]) {
+  const supabase = getServerSupabase();
+  // update positions to match order in ids array
+  for (let i = 0; i < ids.length; i++) {
+    const id = ids[i];
+    const { error } = await supabase.from("meal_plan").update({ position: i + 1 }).eq("id", id);
+    if (error) throw error;
+  }
   revalidatePath("/", "layout");
 }
 
@@ -118,7 +142,7 @@ export async function copyFromPreviousWeek(weekStartIso: string) {
   const prevEnd = addDays(target, -1);
   const { data, error } = await supabase
     .from("meal_plan")
-    .select("date, meal_type, recipe_id, servings")
+    .select("date, meal_type, recipe_id, servings, position")
     .gte("date", toIsoDate(prevStart))
     .lte("date", toIsoDate(prevEnd));
   if (error) throw error;

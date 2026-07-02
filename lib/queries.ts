@@ -41,7 +41,8 @@ export async function listMealsForWeek(
     .select("*, recipe:recipes(*)")
     .gte("date", startIso)
     .lte("date", endIso)
-    .order("date", { ascending: true });
+    .order("date", { ascending: true })
+    .order("position", { ascending: true });
   if (error) throw error;
   return (data ?? []) as MealPlanEntryWithRecipe[];
 }
@@ -51,13 +52,19 @@ export async function listMealsForWeekWithIngredients(
   endIso: string,
 ): Promise<Array<MealPlanEntryWithRecipe & { ingredients: Ingredient[] }>> {
   const supabase = getServerSupabase();
-  const { data, error } = await supabase
+  // order by date then position so meals within the same day are returned in the intended order
+  // (position column may be new; if absent the DB will still return results)
+  const ordered = await supabase
     .from("meal_plan")
     .select("*, recipe:recipes(*, ingredients(*))")
     .gte("date", startIso)
-    .lte("date", endIso);
-  if (error) throw error;
-  return (data ?? []).map((row: any) => ({
+    .lte("date", endIso)
+    .order("date", { ascending: true })
+    .order("position", { ascending: true });
+
+  if (ordered.error) throw ordered.error;
+  const rows = ordered.data;
+  return (rows ?? []).map((row: any) => ({
     ...row,
     ingredients: row.recipe?.ingredients ?? [],
   }));

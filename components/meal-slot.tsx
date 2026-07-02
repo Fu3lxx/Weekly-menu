@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RecipePickerSheet } from "@/components/recipe-picker-sheet";
-import { removeMeal, updateMealServings, addMeal } from "@/app/actions";
+import { removeMeal, updateMealServings, addMeal, updateMealOrder } from "@/app/actions";
 import type { MealPlanEntryWithRecipe, MealType, Recipe } from "@/lib/types";
 
 interface Props {
@@ -66,9 +66,44 @@ export function MealSlot({ date, mealType, meals, recipes }: Props) {
   return (
     <>
       <div className="flex flex-col gap-1">
-        {meals.map((m) => (
+        {meals.map((m, idx) => (
           <button
             key={m.id}
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData("text/plain", m.id);
+              // allow move effect
+              try {
+                e.dataTransfer.effectAllowed = "move";
+              } catch {}
+            }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              // show drop effect
+              try {
+                e.dataTransfer.dropEffect = "move";
+              } catch {}
+            }}
+            onDrop={async (e) => {
+              e.preventDefault();
+              const draggedId = e.dataTransfer.getData("text/plain");
+              if (!draggedId) return;
+              // compute new order: move draggedId to position idx
+              const ids = meals.map((mm) => mm.id).filter(Boolean);
+              const from = ids.indexOf(draggedId);
+              if (from === -1) return;
+              ids.splice(from, 1);
+              ids.splice(idx, 0, draggedId);
+              // call server action to persist order
+              startTransition(async () => {
+                try {
+                  await updateMealOrder(ids);
+                  // toast handled by caller actions or revalidation
+                } catch (e) {
+                  toast.error("Грешка при пренареждане");
+                }
+              });
+            }}
             onClick={() => {
               setEditing(m);
               setServingsDraft(m.servings);

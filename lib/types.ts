@@ -42,6 +42,7 @@ export interface MealPlanEntry {
   meal_type: MealType;
   recipe_id: string;
   servings: number;
+  position?: number;
 }
 
 export interface MealPlanEntryWithRecipe extends MealPlanEntry {
