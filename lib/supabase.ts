@@ -1,5 +1,5 @@
-import { createBrowserClient, createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createBrowserClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 
 function getSupabaseUrl() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -22,15 +22,5 @@ export function getBrowserSupabase() {
 }
 
 export function getServerSupabase() {
-  const cookieStore = cookies();
-  return createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll();
-      },
-      setAll() {
-        // no-op: single-user app, no auth cookies to write
-      },
-    },
-  });
+  return createClient(getSupabaseUrl(), getSupabaseAnonKey());
 }
