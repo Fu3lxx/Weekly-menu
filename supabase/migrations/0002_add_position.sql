@@ -12,7 +12,8 @@ declare
 begin
   for r in select distinct date, meal_type from meal_plan loop
     i := 1;
-    for r in select id from meal_plan where date = r.date and meal_type = r.meal_type order by created_at nulls first, id loop
+    -- created_at may not exist in the schema; fall back to ordering by id for deterministic results
+    for r in select id from meal_plan where date = r.date and meal_type = r.meal_type order by id loop
       update meal_plan set position = i where id = r.id;
       i := i + 1;
     end loop;
