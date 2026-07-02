@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Warm terracotta theme */
+    --background: 36 33% 97%;
+    --foreground: 24 10% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 24 10% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 10% 15%;
+    --primary: 17 75% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 40% 92%;
+    --secondary-foreground: 24 10% 20%;
+    --muted: 30 30% 94%;
+    --muted-foreground: 24 5% 45%;
+    --accent: 30 40% 88%;
+    --accent-foreground: 24 10% 20%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 20% 87%;
+    --input: 30 20% 87%;
+    --ring: 17 75% 52%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 24 12% 10%;
+    --foreground: 30 25% 95%;
+    --card: 24 12% 13%;
+    --card-foreground: 30 25% 95%;
+    --popover: 24 12% 13%;
+    --popover-foreground: 30 25% 95%;
+    --primary: 17 80% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 24 10% 20%;
+    --secondary-foreground: 30 25% 95%;
+    --muted: 24 10% 18%;
+    --muted-foreground: 30 10% 65%;
+    --accent: 24 10% 22%;
+    --accent-foreground: 30 25% 95%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 24 10% 22%;
+    --input: 24 10% 22%;
+    --ring: 17 80% 58%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html { -webkit-text-size-adjust: 100%; }
+}
