@@ -34,7 +34,9 @@ export function RecipePickerSheet({ open, onOpenChange, recipes, onPick }: Props
   }, [recipes, query, tag]);
 
   const handlePick = (r: Recipe) => {
-    onPick(r, r.default_servings);
+    // Always add a single serving when picking a recipe from the picker
+    // (previously used the recipe's default_servings)
+    onPick(r, 1);
     onOpenChange(false);
     setQuery("");
     setTag(null);
