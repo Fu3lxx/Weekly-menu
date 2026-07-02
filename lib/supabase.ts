@@ -1,16 +1,29 @@
 import { createBrowserClient, createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+function getSupabaseUrl() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL environment variable");
+  }
+  return url;
+}
+
+function getSupabaseAnonKey() {
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!anonKey) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable");
+  }
+  return anonKey;
+}
 
 export function getBrowserSupabase() {
-  return createBrowserClient(url, anonKey);
+  return createBrowserClient(getSupabaseUrl(), getSupabaseAnonKey());
 }
 
 export function getServerSupabase() {
   const cookieStore = cookies();
-  return createServerClient(url, anonKey, {
+  return createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
     cookies: {
       getAll() {
         return cookieStore.getAll();
